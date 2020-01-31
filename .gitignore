@@ -1,0 +1,46 @@
+# Compiled class file
+*.class
+
+# Bin directory #
+bin/
+
+# DDBB
+*.db
+
+# mvn build directory #
+target/
+
+# eclipse meta files #
+.metadata
+.settings/
+*.launch
+.classpath
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# External tool builders
+.externalToolBuilders/
+
+# Log/tmp/bak files
+tmp/
+*.log
+*.log.*
+*.tmp
+*.bak
+*.swp
+*~.nib
+*.orig
+
+# virtual machine crash logs
+hs_err_pid*
+/build/
+
+# Allow repository
+!src/main/webapp/WEB-INF/lib/*
+!repo/*
