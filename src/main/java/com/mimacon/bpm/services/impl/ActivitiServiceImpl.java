@@ -5,15 +5,18 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
+import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstanceMeta;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.GetVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.engine.RepositoryService;
 import org.slf4j.Logger;
@@ -23,7 +26,9 @@ import org.springframework.stereotype.Service;
 
 import com.mimacom.bpm.activiti.SecurityUtil;
 import com.mimacom.bpm.domain.Inversion;
+import com.mimacom.bpm.domain.InversionTask;
 import com.mimacon.bpm.services.ActivitiService;
+import com.mimacon.bpm.utils.Constants;
 
 
 @Service
@@ -40,13 +45,9 @@ public class ActivitiServiceImpl  implements ActivitiService{
 	@Autowired
 	private TaskRuntime taskRuntime;
 	
-	 @Autowired
-	 private SecurityUtil securityUtil;
+	@Autowired
+	private SecurityUtil securityUtil;
 
-
-
-
-	
 	@Override
 	public List<ProcessDefinition> getProcessDefinitions() {
 		 Page<ProcessDefinition> processDefinitionPage = processRuntime.processDefinitions(Pageable.of(0, 10));
@@ -61,8 +62,8 @@ public class ActivitiServiceImpl  implements ActivitiService{
 
 	@Override
 	public ProcessDefinition deployProcess(InputStream inputStream, String resourceName, String processID) throws IOException {
-		repositoryService.createDeployment().addInputStream("inversion.bpmn20.xml", inputStream).deploy();
-		return processRuntime.processDefinition("INVERSION");
+		repositoryService.createDeployment().addInputStream(Constants.INVERSION_PROCESS_FILE_NAME, inputStream).deploy();
+		return processRuntime.processDefinition(Constants.INVERSION_PROCESS_DEF_NAME);
 		
 	}
 
@@ -77,9 +78,11 @@ public class ActivitiServiceImpl  implements ActivitiService{
 	@Override
 	public ProcessInstance createProcessInstance(String processDefinitionKey, Inversion anInversion) {
 		HashMap<String, Object> aVariableMap = new HashMap<String, Object>();
-		aVariableMap.put("objeto", anInversion.getObjeto());
-		aVariableMap.put("cantidad", anInversion.getCantidad());
-		aVariableMap.put("lugar", anInversion.getLugar());
+		aVariableMap.put(Constants.INVERSION_VAR_OBJETO, anInversion.getObjeto());
+		aVariableMap.put(Constants.INVERSION_VAR_CANTIDAD, anInversion.getCantidad());
+		aVariableMap.put(Constants.INVERSION_VAR_LUGAR, anInversion.getLugar());
+		aVariableMap.put(Constants.INVERSION_VAR_CLASIFICACION, Constants.INVERSION_VAR_SIN_CLASIFICACION);
+		aVariableMap.put(Constants.INVERSION_VAR_APROBADA, false);
 		StartProcessPayload aStartProcessPayload = ProcessPayloadBuilder.start()
 				.withProcessDefinitionKey(processDefinitionKey).withVariables(aVariableMap)
 				.withName(anInversion.getObjeto()).build();
@@ -105,8 +108,6 @@ public class ActivitiServiceImpl  implements ActivitiService{
 		return taskRuntime.task(idTask);
 	}
 	
-	
-	
     @Override
 	public List<Task> getMyTasks(String userName) {
     	securityUtil.logInAs(userName);
@@ -114,6 +115,83 @@ public class ActivitiServiceImpl  implements ActivitiService{
 		logger.info(" Tareas" + tasks.getTotalItems());
 		return tasks.getContent();
 	}
+
+	@Override
+	public InversionTask getInversionTask(String idTask, String userName) {
+		securityUtil.logInAs(userName);
+		Task aTask = taskRuntime.task(idTask);
+		List<VariableInstance> variables = this.getProcessVariablesFromTaskId(aTask.getId());
+        InversionTask anInversionTask = new InversionTask();
+        Inversion anInversion = new Inversion();
+        VariableInstance aVariableInstanceObjeto = variables.stream()
+                .filter(x -> Constants.INVERSION_VAR_OBJETO.equals(x.getName()))
+                .findAny()
+                .orElse(null);
+        anInversion.setObjeto(aVariableInstanceObjeto.getValue());
+        VariableInstance aVariableInstanceLugar = variables.stream()
+                .filter(x -> Constants.INVERSION_VAR_LUGAR.equals(x.getName()))
+                .findAny()
+                .orElse(null);
+        anInversion.setLugar(aVariableInstanceLugar.getValue());
+        VariableInstance aVariableInstanceCantidad = variables.stream()
+                .filter(x -> Constants.INVERSION_VAR_CANTIDAD.equals(x.getName()))
+                .findAny()
+                .orElse(null);
+        anInversion.setCantidad(aVariableInstanceCantidad.getValue());
+        VariableInstance aVariableInstanceClasif = variables.stream()
+                .filter(x -> Constants.INVERSION_VAR_CLASIFICACION.equals(x.getName()))
+                .findAny()
+                .orElse(null);
+        
+        anInversion.setClasificacion(aVariableInstanceClasif.getValue());
+        anInversionTask.setInversion(anInversion);
+        anInversionTask.setTaskId(aTask.getId());	
+        anInversionTask.setTaskName(aTask.getName());
+		return anInversionTask;
+	}
+	
+	@Override
+	public InversionTask endInversionTask(InversionTask anInversionTask) {
+		securityUtil.logInAs(anInversionTask.getUserName());
+		HashMap<String, Object> aVariableMap = new HashMap<String, Object>();
+		aVariableMap.put(Constants.INVERSION_VAR_OBJETO, anInversionTask.getInversion().getObjeto());
+		aVariableMap.put(Constants.INVERSION_VAR_CANTIDAD, anInversionTask.getInversion().getCantidad());
+		aVariableMap.put(Constants.INVERSION_VAR_LUGAR, anInversionTask.getInversion().getLugar());
+		CompleteTaskPayload aCompleteTaskPayload = new CompleteTaskPayload();
+		aCompleteTaskPayload.setTaskId(anInversionTask.getTaskId());
+		//Obtener la clasificacion
+        List<VariableInstance> variables = this.getProcessVariablesFromTaskId(anInversionTask.getTaskId());
+        VariableInstance aVariableInstanceClasificacion = variables.stream()
+                .filter(x -> Constants.INVERSION_VAR_CLASIFICACION.equals(x.getName()))
+                .findAny()
+                .orElse(null);
+        aVariableMap.put(Constants.INVERSION_VAR_CLASIFICACION, aVariableInstanceClasificacion.getValue());
+        
+        VariableInstance aVariableInstanceAprobar = variables.stream()
+                .filter(x -> Constants.INVERSION_VAR_APROBADA.equals(x.getName()))
+                .findAny()
+                .orElse(null);
+        aVariableMap.put(Constants.INVERSION_VAR_APROBADA, aVariableInstanceAprobar.getValue());
+        
+        
+		aCompleteTaskPayload.setVariables(aVariableMap);
+		taskRuntime.complete(aCompleteTaskPayload);
+		return anInversionTask;
+		
+	}
+	
+	/**
+	 * Obtiene la lista de instancias de variable del procesos
+	 * @param idTask String con el identificador de la tarea
+	 * @return Lista de objetos de tipo {@link VariableInstance}
+	 */
+	private  List<VariableInstance>getProcessVariablesFromTaskId(String idTask) {
+		Task aTask = taskRuntime.task(idTask);
+		GetVariablesPayload payload = new GetVariablesPayload(aTask.getProcessInstanceId());
+        return processRuntime.variables(payload);
+	}
+	
+	
 	
 	
 	

@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mimacom.bpm.domain.Inversion;
+import com.mimacom.bpm.domain.InversionTask;
 import com.mimacon.bpm.services.ActivitiService;
+import com.mimacon.bpm.utils.Constants;
 /**
  * Controlador REST con los métodos de gobierno del BPM Activiti 
  * @author AlfayaFJ
@@ -29,10 +31,7 @@ import com.mimacon.bpm.services.ActivitiService;
 @RestController
 @RequestMapping("/bpm")
 public class ActivitiController {
-	
-	private static final String PROCESS_ID_INVESTMENT = "INVERSION";
-	
-	
+
 	@Autowired
 	private ActivitiService activitiService;
 
@@ -54,47 +53,97 @@ public class ActivitiController {
 		return ResponseEntity.ok( activitiService.getProcessDefinitions());
 	}
 	
-	
-
+	/**
+	 * Despliga una definición de proceso
+	 * @param file Objeto {@link MultipartFile} fichero con la definición del procesos
+	 * @return Objeto de tipo {@link ProcessDefinition} con la definicion del procesos 
+	 * @throws IOException 
+	 */
 	@PostMapping(value = "/deploy-process")
 	public  ResponseEntity<ProcessDefinition> deployProcess(@RequestParam("file") MultipartFile file) throws IOException {
-		return ResponseEntity.ok(activitiService.deployProcess(file.getInputStream(),file.getName(),PROCESS_ID_INVESTMENT));
+		return ResponseEntity.ok(activitiService.deployProcess(file.getInputStream(),file.getName(),Constants.INVERSION_PROCESS_DEF_NAME));
 	}
 	
+	/**
+	 * Borra el proceso del repositorio
+	 * @param processName String con el nombre del proceso
+	 */
 	@DeleteMapping(value = "/delete-process/{processName}")
 	public void deleteProcess(@PathVariable("processName") String  processName) {
 		activitiService.deleteProcess(processName);
 		
 	}
 	
+	/**
+	 * Inicia un proceso de inversiones con los datos pasados
+	 * @param anInversion Objeto {@link Inversion} con los datos de la inversión
+	 * @return Onjeto de tipo {@link ProcessInstance} con los datos del procesos iniciado
+	 */
 	@PostMapping(value = "/start-process")
 	public ResponseEntity<ProcessInstance> startProcess(@RequestBody Inversion anInversion) {
-		String processDefinitionKey = PROCESS_ID_INVESTMENT;
+		String processDefinitionKey = Constants.INVERSION_PROCESS_DEF_NAME;
 		return ResponseEntity.ok( activitiService.createProcessInstance(processDefinitionKey, anInversion));
 	}
 	
+	/**
+	 * Devuelve la lista de procesos instaciados en el sistema
+	 * @return Lista de objetos de tipo {@link ProcessInstance}
+	 */
 	@GetMapping(value = "/process-instances")
 	public ResponseEntity<List<ProcessInstance>> getProcessInstances() {
 		return ResponseEntity.ok(activitiService.getProcessInstances());
 	}
 	
+	/**
+	 * Devuelve el detalla de la instancia de procesos
+	 * @param processInstanceId String con el identificador del procesos instanciado
+	 * @return Objeto {@link ProcessInstanceMeta} con la información del proceso
+	 */
 	@GetMapping(value = "/process-detail/{processInstanceId}")
 	public ResponseEntity<ProcessInstanceMeta> getProcessDetailByIdProcess(@PathVariable("processInstanceId") String  processInstanceId) {
-	
 		return ResponseEntity.ok(activitiService.getProcessInstanceMetaById(processInstanceId));
 	}
 	
+	/**
+	 * Obtiene las tareas de un determinado usuario
+	 * @param userName Nombre del usuario
+	 * @return Lista de objetos de tipo {@link Task}
+	 */
 	@GetMapping(value = "/get-mytask/{userName}")
 	public ResponseEntity<List<Task>> getAllTasks(@PathVariable("userName") String  userName) {
 		return ResponseEntity.ok(activitiService.getMyTasks(userName));
 	}
 	
-	
+	/**
+	 * Obtiene la tarea 
+	 * @param taskId String con el identificador de tarea
+	 * @return Objeto de tipo {@link Task}
+	 */
 	@GetMapping(value = "/get-task/{taskId}")
 	public ResponseEntity<Task> getTask(@PathVariable("taskId") String  taskId) {
 		return ResponseEntity.ok(activitiService.getTaskById(taskId));
 	}
 	
+	/**
+	 * Obtiene un objeto de tipo InversionTask
+	 * @param taskId String con el identificador de la tarea
+	 * @param userName Nombre de usuario
+	 * @return Objeto de tipo {@link InversionTask}
+	 */
+	@GetMapping(value = "/get-inversion-task/{taskId}/{userName}")
+	public ResponseEntity<InversionTask> getInversionTask(@PathVariable("taskId") String  taskId, @PathVariable("userName") String  userName) {
+		return ResponseEntity.ok(activitiService.getInversionTask(taskId, userName));
+	}
+	
+	/**
+	 * Finaliza la tarea de inversion
+	 * @param anInversionTask Objeto de tipo {@link InversionTask} con la información de la tarea
+	 * @return Objeto de tipo {@link InversionTask} actualizado
+	 */
+	@PostMapping(value = "/end-inversion-task")
+	public ResponseEntity<InversionTask> endInversionTask(@RequestBody InversionTask anInversionTask) {
+		return ResponseEntity.ok( activitiService.endInversionTask(anInversionTask));
+	}
 	
 	
 	

@@ -10,6 +10,8 @@ public class Inversion {
 	private String objeto;
 	private Double cantidad;
 	private String lugar;
+	private String clasificacion;
+	private Boolean aprobar;
 	
 	public String getLugar() {
 		return lugar;
@@ -28,6 +30,18 @@ public class Inversion {
 	}
 	public void setCantidad(Double cantidad) {
 		this.cantidad = cantidad;
+	}
+	public String getClasificacion() {
+		return clasificacion;
+	}
+	public void setClasificacion(String clasificacion) {
+		this.clasificacion = clasificacion;
+	}
+	public Boolean getAprobar() {
+		return aprobar;
+	}
+	public void setAprobar(Boolean aprobar) {
+		this.aprobar = aprobar;
 	}
 
 }

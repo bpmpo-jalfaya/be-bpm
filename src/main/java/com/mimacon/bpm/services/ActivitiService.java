@@ -9,6 +9,7 @@ import org.activiti.api.process.model.ProcessInstanceMeta;
 import org.activiti.api.task.model.Task;
 
 import com.mimacom.bpm.domain.Inversion;
+import com.mimacom.bpm.domain.InversionTask;
 
 public interface ActivitiService {
 	
@@ -66,6 +67,20 @@ public interface ActivitiService {
 	 * @return
 	 */
 	public Task getTaskById(String idTask);
+	
+	/**
+	 * 
+	 * @param idTAsk
+	 * @return
+	 */
+	public InversionTask getInversionTask(String idTask, String userName);
+	
+	/**
+	 * 
+	 * @param anInversionTak
+	 * @return
+	 */
+	public InversionTask endInversionTask(InversionTask anInversionTak);
 	
 	
 }
