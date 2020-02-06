@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@ComponentScan({"com.mimacom.bpm.activiti","com.mimacom.bpm.controllers","com.mimacon.bpm.services"})
+@ComponentScan({"com.mimacom.bpm.activiti","com.mimacom.bpm.controllers","com.mimacom.bpm.services"})
 public class ActivitiApplication {
 
 	public static void main(String[] args) {
