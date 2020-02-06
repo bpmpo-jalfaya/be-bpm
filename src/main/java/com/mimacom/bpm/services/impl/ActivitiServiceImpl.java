@@ -192,17 +192,4 @@ public class ActivitiServiceImpl  implements ActivitiService{
         return processRuntime.variables(payload);
 	}
 	
-	
-	
-	
-	
-	
-
-
-	
-	
-	
-	
-	
-
 }
