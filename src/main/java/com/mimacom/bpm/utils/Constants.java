@@ -1,4 +1,4 @@
-package com.mimacon.bpm.utils;
+package com.mimacom.bpm.utils;
 
 public class Constants {
 	

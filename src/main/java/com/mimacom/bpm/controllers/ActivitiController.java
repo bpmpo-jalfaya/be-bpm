@@ -21,8 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.mimacom.bpm.domain.Inversion;
 import com.mimacom.bpm.domain.InversionTask;
-import com.mimacon.bpm.services.ActivitiService;
-import com.mimacon.bpm.utils.Constants;
+import com.mimacom.bpm.services.ActivitiService;
+import com.mimacom.bpm.utils.Constants;
 /**
  * Controlador REST con los métodos de gobierno del BPM Activiti 
  * @author AlfayaFJ
@@ -41,7 +41,7 @@ public class ActivitiController {
 	 */
 	@GetMapping(value = "/test")
 	public ResponseEntity<String> test() {
-		return ResponseEntity.ok(new String("Test Conection activiti API OK"));
+		return ResponseEntity.ok(new String("Test Connection activiti REST API OK"));
 	}
 	
 	/**

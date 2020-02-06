@@ -1,4 +1,4 @@
-package com.mimacon.bpm.services;
+package com.mimacom.bpm.services;
 
 import java.io.IOException;
 import java.io.InputStream;

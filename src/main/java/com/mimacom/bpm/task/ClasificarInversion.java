@@ -5,7 +5,7 @@ import org.activiti.engine.delegate.JavaDelegate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mimacon.bpm.utils.Constants;
+import com.mimacom.bpm.utils.Constants;
 
 /**
  * Implementación de la clase que pondera la inversión

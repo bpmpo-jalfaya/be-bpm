@@ -1,4 +1,4 @@
-package com.mimacon.bpm.services.impl;
+package com.mimacom.bpm.services.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,8 +27,8 @@ import org.springframework.stereotype.Service;
 import com.mimacom.bpm.activiti.SecurityUtil;
 import com.mimacom.bpm.domain.Inversion;
 import com.mimacom.bpm.domain.InversionTask;
-import com.mimacon.bpm.services.ActivitiService;
-import com.mimacon.bpm.utils.Constants;
+import com.mimacom.bpm.services.ActivitiService;
+import com.mimacom.bpm.utils.Constants;
 
 
 @Service
