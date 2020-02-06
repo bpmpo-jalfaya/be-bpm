@@ -172,14 +172,9 @@ public class ActivitiServiceImpl  implements ActivitiService{
                 .findAny()
                 .orElse(null);
         aVariableMap.put(Constants.INVERSION_VAR_CLASIFICACION, aVariableInstanceClasificacion.getValue());
-        
-        VariableInstance aVariableInstanceAprobar = variables.stream()
-                .filter(x -> Constants.INVERSION_VAR_APROBADA.equals(x.getName()))
-                .findAny()
-                .orElse(null);
+        //Actualizar la aprobación
         aVariableMap.put(Constants.INVERSION_VAR_APROBADA, anInversionTask.getInversion().getAprobada());
-        
-        
+        //Set de variables en proceso
 		aCompleteTaskPayload.setVariables(aVariableMap);
 		taskRuntime.complete(aCompleteTaskPayload);
 		return anInversionTask;
